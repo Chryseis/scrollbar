@@ -18,13 +18,6 @@
     "react"
   ],
   "plugins": [
-    [
-      "@yylc/babel-plugin-demand-loading",
-      {
-        "library": "@yylc/kit"
-      },
-      "syntax-decorators"
-    ],
     "transform-decorators-legacy",
     "transform-class-properties",
     "transform-runtime",

@@ -4,54 +4,63 @@
 import './app.less';
 
 import React from 'react'
+import faker from 'faker'
 import ScrollBar from './ScrollBar';
-
-const LOADING = 1;
-const LOADED = 2;
-let itemStatusMap = {};
-
-const isItemLoaded = index => !!itemStatusMap[index];
-const loadMoreItems = (startIndex, stopIndex) => {
-  for (let index = startIndex; index <= stopIndex; index++) {
-    itemStatusMap[index] = LOADING;
-  }
-  return new Promise(resolve =>
-      setTimeout(() => {
-        for (let index = startIndex; index <= stopIndex; index++) {
-          itemStatusMap[index] = LOADED;
-        }
-        resolve();
-      }, 2500)
-  );
-};
-
-class Row extends React.Component {
-  render() {
-    const { index, style } = this.props;
-    let label;
-    if (itemStatusMap[index] === LOADED) {
-      label = `Row ${index}`;
-    } else {
-      label = "Loading...";
-    }
-    return (
-        <div className="ListItem" style={style}>
-          {label}
-        </div>
-    );
-  }
-}
+import ExampleWrapper from './ExampleWrapper'
 
 class App extends React.Component {
-  constructor(props) {
-    super(props);
-  }
+    constructor(props) {
+        super(props);
+        this.state = {
+            hasNextPage: true,
+            isNextPageLoading: false,
+            items: []
+        };
+    }
 
-  render() {
-    return <div className="app">
-      <ScrollBar/>
-    </div>
-  }
+    _initPage = () => {
+        return new Promise(resolve => {
+            this.setState({ isNextPageLoading: true, items: [] }, () => {
+                setTimeout(() => {
+                    this.setState(state => ({
+                        hasNextPage: state.items.length < 500,
+                        isNextPageLoading: false,
+                        items: [...state.items].concat(
+                            new Array(30).fill(true).map(() => ({ name: faker.name.findName() }))
+                        )
+                    }));
+                    resolve(1);
+                }, 2500);
+            });
+        });
+    };
+
+    _loadNextPage = (...args) => {
+        console.log("loadNextPage", ...args);
+        this.setState({ isNextPageLoading: true }, () => {
+            setTimeout(() => {
+                this.setState(state => ({
+                    hasNextPage: state.items.length < 100,
+                    isNextPageLoading: false,
+                    items: [...state.items].concat(
+                        new Array(30).fill(true).map(() => ({ name: faker.name.findName() }))
+                    )
+                }));
+            }, 2500);
+        });
+    };
+
+    render() {
+        const { hasNextPage, isNextPageLoading, items } = this.state;
+        return <div className="app">
+            <ScrollBar hasNextPage={hasNextPage}
+                       isNextPageLoading={isNextPageLoading}
+                       items={items}
+                       loadNextPage={this._loadNextPage}
+                       initPage={this._initPage}
+            />
+        </div>
+    }
 }
 
 export default App
