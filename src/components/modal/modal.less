@@ -1,0 +1,21 @@
+.modal-mask {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7);
+  transition: opacity .5s ease-in;
+  &.entering, &.exiting, &.exited {
+    opacity: 0;
+  }
+  &.entered {
+    opacity: 1;
+  }
+  .wrapper {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+}
