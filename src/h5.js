@@ -5,9 +5,6 @@ import 'babel-polyfill';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import App from './layouts/app/app';
-import injectTapEventPlugin from 'react-tap-event-plugin';
-
-injectTapEventPlugin();
 
 
 //弹框禁止背景滚动
