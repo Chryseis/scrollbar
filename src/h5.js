@@ -5,6 +5,7 @@ import 'babel-polyfill';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import App from './layouts/app/app';
+import Test from './layouts/app/test'
 
 
 //弹框禁止背景滚动
@@ -32,4 +33,4 @@ let div = document.createElement('div');
 div.id = 'app';
 document.body.appendChild(div);
 
-ReactDOM.render(<App/>, div);
+ReactDOM.render(<Test/>, div);
