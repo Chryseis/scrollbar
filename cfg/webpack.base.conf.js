@@ -1,7 +1,7 @@
 /**
  * Created by Administrator on 2017/12/10.
  */
-const path = require('path');
+const path = require('path')
 
 module.exports = {
     devtool: "source-map",
@@ -54,6 +54,9 @@ module.exports = {
         ]
     },
     resolve: {
-        extensions: [".js", ".json", ".jsx", ".css", ".less"]
+        extensions: [".js", ".json", ".jsx", ".css", ".less"],
+        alias: {
+            '@': path.resolve(__dirname,'../src')
+        }
     }
 }

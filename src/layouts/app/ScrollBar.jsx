@@ -20,8 +20,8 @@ class ScrollBar extends React.PureComponent {
     itemSize: 50,
     style: {},
     className: null,
-    rowItem: item => <div>{item.name}</div>,
-    rowLoadingItem: () => <div>loading</div>
+    rowItem: (item, style) => <div style={style}>{item.name}</div>,
+    rowLoadingItem: (item, style) => <div style={style}>loading</div>
   };
 
   state = {
@@ -33,6 +33,7 @@ class ScrollBar extends React.PureComponent {
 
   itemCount = () => {
     const { hasNextPage, items } = this.props;
+    console.log(hasNextPage ? items.length + 1 : items.length);
     return hasNextPage ? items.length + 1 : items.length;
   };
 
@@ -49,13 +50,13 @@ class ScrollBar extends React.PureComponent {
 
   Item = ({ index, style }) => {
     const { items, rowItem, rowLoadingItem } = this.props;
-    let content;
+    let element;
     if (!this.isItemLoaded(index)) {
-      content = rowLoadingItem();
+      element = rowLoadingItem(style);
     } else {
-      content = rowItem(items[index]);
+      element = rowItem(items[index], style);
     }
-    return <div style={style}>{content}</div>;
+    return element;
   };
 
   onTouchStart = e => {
@@ -126,7 +127,7 @@ class ScrollBar extends React.PureComponent {
                 onTouchStart={this.onTouchStart} onTouchMove={this.onTouchMove}
                 onTouchEnd={this.onTouchEnd} onTransitionEnd={this.onTransitionEnd}>
       <div className={`pull-wrap ${transition ? 'transition' : ''}`.trim()} style={{ height: y, visibility }}>
-        <Spring to={{ opacity: present }}>{props => <div style={props}>loading</div>}</Spring>
+        <Spring to={{ opacity: present }}>{props => <div style={props} className="icon"/>}</Spring>
       </div>
       <InfiniteLoader
           isItemLoaded={this.isItemLoaded}
