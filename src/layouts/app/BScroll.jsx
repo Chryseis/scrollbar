@@ -34,12 +34,12 @@ class BScroll extends React.Component {
 
     render() {
         const { data } = this.state
-        return <ScrollBar refresh={this.refreshDataSource} loadMore={this.loadMoreDataSource} pullDownRefresh={true}
-                          pullUpLoad={true}>
+        return <div className="test"><ScrollBar refresh={this.refreshDataSource} loadMore={this.loadMoreDataSource} pullDownRefresh={true}
+                               pullUpLoad={true}>
             {map(data, (o, i) => <li className="name" key={i}>
                 {o.name}
             </li>)}
-        </ScrollBar>
+        </ScrollBar></div>
     }
 }
 

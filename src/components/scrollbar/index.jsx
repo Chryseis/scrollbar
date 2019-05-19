@@ -32,13 +32,27 @@ class ScrollBar extends React.Component {
         isPullingDown: false,
         isPullUpLoad: false,
         pullDownTop: initTop,
-        beforePullDown: true
+        beforePullDown: true,
     }
 
     componentDidMount() {
         this.initScroll()
-        this.initPullLoadRefresh()
-        this.initPullUpLoad()
+    }
+
+    componentDidUpdate(prevProps) {
+        if (this.props.children !== prevProps.children) {
+            if (!this.state.isPullingDown) {
+                this.scroll.refresh()
+            }
+        }
+    }
+
+    componentWillUnmount() {
+        this.scroll.stop()
+        this.scroll.destroy()
+        this.scroll = null
+        clearTimeout(this.timerRebound)
+        clearTimeout(this.timerAfter)
     }
 
     initScroll = () => {
@@ -58,9 +72,12 @@ class ScrollBar extends React.Component {
             pullDownRefresh: _pullDownRefresh,
             pullUpLoad: _pullUpLoad,
             scrollbar: {
-                fade: true
+                fade: false
             }
         })
+
+        this.initPullLoadRefresh()
+        this.initPullUpLoad()
     }
 
     initPullUpLoad = () => {
@@ -127,7 +144,7 @@ class ScrollBar extends React.Component {
     reboundPullDown = () => {
         const { pullDownRefresh: { stopTime = 600 } } = this.props
         return new Promise(resolve => {
-            setTimeout(_ => {
+            this.timerRebound = setTimeout(_ => {
                 this.isRebounding = true
                 this.scroll.finishPullDown()
                 resolve()
@@ -136,7 +153,7 @@ class ScrollBar extends React.Component {
     }
 
     afterPullDown = () => {
-        setTimeout(() => {
+        this.timerAfter = setTimeout(() => {
             this.setState({
                 pullDownTop: initTop,
                 beforePullDown: true
@@ -147,9 +164,9 @@ class ScrollBar extends React.Component {
     }
 
     render() {
-        const { tagName, prefixCls, scrollPrefixCls } = this.props
+        const { tagName, prefixCls, scrollPrefixCls, style } = this.props
         const { pullDownTop, isPullUpLoad } = this.state
-        return <div className="scrollbar" ref={ref => this.wrapRef = ref}>
+        return <div className="scrollbar" ref={ref => this.wrapRef = ref} style={style}>
             <div className={`scroll-wrap ${prefixCls ? prefixCls : ''}`}>
                 <div ref={ref => this.scrollRef = ref}>
                     {
