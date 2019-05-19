@@ -1,53 +1,170 @@
 import './index.less'
-import React, {Fragment} from 'react'
+import React from 'react'
 import BScroll from 'better-scroll'
 
-class index extends React.Component {
+const initTop = -50
+const defaultPullDownRefresh = {
+    threshold: 50,
+    stop: 50
+}
+const defaultPullUpLoad = {
+    threshold: 0,
+    txt: {
+        more: '加载中',
+        nomore: '没有更多了',
+    },
+}
+
+class ScrollBar extends React.Component {
     static defaultProps = {
         tagName: 'ul',
         prefixCls: '',
-        scrollPrefixCls: ''
+        scrollPrefixCls: '',
+        refresh: () => {
+        },
+        loadMore: () => {
+        }
     }
 
+    isRebounding = false
+
     state = {
-        listHeight: 0,
-        height: 0,
-        pullUpLoad: false,
-        pullDownRefresh: false
+        isPullingDown: false,
+        isPullUpLoad: false,
+        pullDownTop: initTop,
+        beforePullDown: true
     }
 
     componentDidMount() {
+        this.initScroll()
+        this.initPullLoadRefresh()
+        this.initPullUpLoad()
+    }
 
-        const { pullUpLoad, pullDownRefresh } = this.state
+    initScroll = () => {
+        const { pullDownRefresh, pullUpLoad } = this.props
+
+        let _pullDownRefresh = typeof pullDownRefresh === 'object' ? {
+            ...defaultPullDownRefresh,
+            ...pullDownRefresh
+        } : (pullDownRefresh ? defaultPullDownRefresh : false)
+
+        let _pullUpLoad = typeof pullUpLoad === 'object' ? {
+            ...defaultPullUpLoad,
+            ...pullUpLoad
+        } : (pullUpLoad ? defaultPullUpLoad : false)
 
         this.scroll = new BScroll(this.wrapRef, {
-            pullDownRefresh: pullDownRefresh,
-            pullUpLoad: pullUpLoad,
+            pullDownRefresh: _pullDownRefresh,
+            pullUpLoad: _pullUpLoad,
             scrollbar: {
                 fade: true
             }
         })
     }
 
+    initPullUpLoad = () => {
+        const { loadMore } = this.props
+        this.scroll.on('pullingUp', () => {
+            this.setState({
+                isPullUpLoad: true
+            })
+
+            loadMore().then(() => {
+                this.setState({
+                    isPullUpLoad: false,
+                })
+                this.scroll.finishPullUp()
+                this.scroll.refresh()
+            })
+        })
+    }
+
+    initPullLoadRefresh = () => {
+        const { refresh, pullDownRefresh } = this.props
+        const { beforePullDown, pullDownTop } = this.state
+
+        let _pullDownRefresh = typeof pullDownRefresh === 'object' ? {
+            ...defaultPullDownRefresh,
+            ...pullDownRefresh
+        } : (pullDownRefresh ? defaultPullDownRefresh : false)
+
+        this.scroll.on('pullingDown', () => {
+            this.setState({
+                beforePullDown: false,
+                isPullingDown: true
+            })
+
+            refresh().then(_ => {
+                this.setState({
+                    isPullingDown: false
+                })
+                this.reboundPullDown().then(_ => {
+                    this.afterPullDown()
+                })
+            })
+        })
+
+        this.scroll.on('scroll', ({ y }) => {
+            if (y < 0) {
+                return
+            }
+
+            if (beforePullDown) {
+                this.setState({
+                    pullDownTop: Math.min(y + pullDownTop, 10)
+                })
+            }
+
+            if (this.isRebounding) {
+                this.setState({
+                    pullDownTop: 10 - (_pullDownRefresh.stop - y)
+                })
+            }
+        })
+    }
+
+    reboundPullDown = () => {
+        const { pullDownRefresh: { stopTime = 600 } } = this.props
+        return new Promise(resolve => {
+            setTimeout(_ => {
+                this.isRebounding = true
+                this.scroll.finishPullDown()
+                resolve()
+            }, stopTime)
+        })
+    }
+
+    afterPullDown = () => {
+        setTimeout(() => {
+            this.setState({
+                pullDownTop: initTop,
+                beforePullDown: true
+            })
+            this.isRebounding = false
+            this.scroll.refresh()
+        }, this.scroll.options.bounceTime)
+    }
+
     render() {
         const { tagName, prefixCls, scrollPrefixCls } = this.props
-        const { listHeight } = this.state
-        return <div className="scrollbar">
-            <div className={`scroll-wrap ${prefixCls ? prefixCls : ''}`} ref={ref => this.wrapRef = ref}>
+        const { pullDownTop, isPullUpLoad } = this.state
+        return <div className="scrollbar" ref={ref => this.wrapRef = ref}>
+            <div className={`scroll-wrap ${prefixCls ? prefixCls : ''}`}>
                 <div ref={ref => this.scrollRef = ref}>
                     {
                         React.createElement(tagName, { className: scrollPrefixCls ? scrollPrefixCls : '' }, this.props.children)
                     }
                 </div>
-                <div className="pull-up-loadmore">
-                    loading
+                <div className="pull-up-load">
+                    {isPullUpLoad ? 'loading' : 'no more'}
                 </div>
             </div>
-            <div className="pull-down-refresh">
+            <div className="pull-down-refresh" style={{ top: pullDownTop }}>
                 loading
             </div>
         </div>
     }
 }
 
-export default index
+export default ScrollBar
