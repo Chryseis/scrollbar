@@ -29,8 +29,9 @@ window.ModalHelper = (function (bodyCls) {
     }
 })('modal-open')
 
-let div = document.createElement('div')
-div.id = 'app'
-document.body.appendChild(div)
+// let div = document.createElement('div')
+// div.id = 'app'
+// document.body.appendChild(div)
 
-ReactDOM.render(<BScroll/>, div)
+
+ReactDOM.render(<BScroll/>, document.querySelector('#app'))
