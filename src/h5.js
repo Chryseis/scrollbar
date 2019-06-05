@@ -6,6 +6,7 @@ import React from 'react'
 import ReactDOM from 'react-dom'
 import App from './layouts/app/app'
 import BScroll from './layouts/app/BScroll'
+import Swiper from './layouts/app/Swiper'
 
 
 //弹框禁止背景滚动
@@ -34,4 +35,4 @@ window.ModalHelper = (function (bodyCls) {
 // document.body.appendChild(div)
 
 
-ReactDOM.render(<BScroll/>, document.querySelector('#app'))
+ReactDOM.render(<Swiper/>, document.querySelector('#app'))

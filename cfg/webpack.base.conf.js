@@ -19,11 +19,6 @@ module.exports = {
             },
             {
                 test: /.(css|less)$/,
-                include: [
-                    path.resolve(__dirname, '../src'),
-                    path.resolve(__dirname, '../node_modules/braft-editor')
-                ],
-                exclude: [/node_modules\/(?!(braft-editor)\/).*/],
                 use: ['style-loader', {
                     loader: 'css-loader',
                     options: {
